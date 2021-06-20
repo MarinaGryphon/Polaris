@@ -84,6 +84,9 @@ LOG_GRAFFITI
 ## log admin warning messages
 ##LOG_ADMINWARN  ## Also duplicates a bunch of other messages.
 
+## log all timers in buckets on automatic bucket reset (Useful for timer debugging)
+# LOG_TIMERS_ON_BUCKET_RESET
+
 ## Enable/disable SQL connection (comment out to disable)
 SQL_ENABLED
 

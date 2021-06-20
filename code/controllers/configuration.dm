@@ -23,6 +23,7 @@ var/list/gamemode_cache = list()
 	var/static/log_runtime = 0					// logs world.log to a file
 	var/static/log_world_output = 0			// log to_world_log(messages)
 	var/static/log_graffiti = 0					// logs graffiti
+	var/static/log_timers_on_bucket_reset = 0  // logs all timers in buckets on automatic bucket reset (Useful for timer debugging)
 	var/static/sql_enabled = 0					// for sql switching
 	var/static/allow_admin_ooccolor = 0		// Allows admins with relevant permissions to have their own ooc colour
 	var/static/allow_vote_restart = 0 			// allow votes to restart
@@ -417,6 +418,9 @@ var/list/gamemode_cache = list()
 
 				if ("log_graffiti")
 					config.log_graffiti = 1
+				
+				if ("log_timers_on_bucket_reset")
+					config.log_timers_on_bucket_reset = 1
 
 				if ("generate_map")
 					config.generate_map = 1
