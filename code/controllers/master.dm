@@ -580,6 +580,16 @@ GLOBAL_REAL(Master, /datum/controller/master) = new
 	stat("Byond:", "(FPS:[world.fps]) (TickCount:[world.time/world.tick_lag]) (TickDrift:[round(Master.tickdrift,1)]([round((Master.tickdrift/(world.time/world.tick_lag))*100,0.1)]%))")
 	stat("Master Controller:", statclick.update("(TickRate:[Master.processing]) (Iteration:[Master.iteration])"))
 
+/datum/controller/master/ExplosionStart()
+	for (var/thing in subsystems)
+		var/datum/controller/subsystem/SS = thing
+		SS.ExplosionStart()
+
+/datum/controller/master/ExplosionEnd()
+	for (var/thing in subsystems)
+		var/datum/controller/subsystem/SS = thing
+		SS.ExplosionEnd()
+
 /datum/controller/master/StartLoadingMap(var/quiet = TRUE)
 	if(map_loading)
 		admin_notice("<span class='danger'>Another map is attempting to be loaded before first map released lock.  Delaying.</span>", R_DEBUG)

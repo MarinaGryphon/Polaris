@@ -12,6 +12,9 @@
 	//set to 0 to prevent fire() calls, mostly for admin use or subsystems that may be resumed later
 	//	use the SS_NO_FIRE flag instead for systems that never fire to keep it from even being added to the list
 	var/can_fire = TRUE
+	// Similar to can_fire, but intended explicitly for subsystems that are asleep. Using this var instead of can_fire
+	//	 allows admins to disable subsystems without them re-enabling themselves.
+	var/suspended = FALSE
 
 	// Bookkeeping variables; probably shouldn't mess with these.
 	var/last_fire = 0		//last world.time we called fire()
@@ -172,12 +175,14 @@
 		msg = "NO FIRE\t[msg]"
 	else if(can_fire <= 0)
 		msg = "OFFLINE\t[msg]"
+	else if(suspended)
+		msg = "SUSPEND\t[msg]"
 	else
 		msg = "[round(cost,1)]ms|[round(tick_usage,1)]%([round(tick_overrun,1)]%)|[round(ticks,0.1)]\t[msg]"
 
 	var/title = name
-	if (can_fire)
-		title = "\[[state_letter()]][title]"
+	if (can_fire && !suspended && !(flags & SS_NO_FIRE))
+		title = "\[[state_letter()]] [title]"
 
 	stat(title, statclick.update(msg))
 
@@ -204,14 +209,24 @@
 //should attempt to salvage what it can from the old instance of subsystem
 /datum/controller/subsystem/Recover()
 
-// Suspends this subsystem from being queued for running.  If already in the queue, sleeps until idle. Returns FALSE if the subsystem was already suspended.
-/datum/controller/subsystem/proc/suspend()
-	. = (can_fire > 0) // Return true if we were previously runnable, false if previously suspended.
+// Admin-disables this subsystem. Will show as OFFLINE in MC panel.
+/datum/controller/subsystem/proc/disable()
 	can_fire = FALSE
-	// Safely sleep in a loop until the subsystem is idle, (or its been un-suspended somehow)
-	while(can_fire <= 0 && state != SS_IDLE)
-		stoplag() // Safely sleep in a loop until 
+
+// Admin-enables this subsystem.
+/datum/controller/subsystem/proc/enable()
+	if (!can_fire)
+		next_fire = world.time + wait
+		can_fire = TRUE
+
+// Suspends this subsystem. Functionally identical to disable(), but shows SUSPEND in MC panel.
+// 	Preferred over disable() for self-disabling subsystems.
+/datum/controller/subsystem/proc/suspend()
+	suspended = TRUE
 
 // Wakes a suspended subsystem.
 /datum/controller/subsystem/proc/wake()
-	can_fire = TRUE
+	if (suspended)
+		suspended = FALSE
+		if (can_fire)
+			next_fire = world.time + wait
